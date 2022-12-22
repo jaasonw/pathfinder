@@ -4,6 +4,8 @@
   import type { SearchFunction } from "./search";
 
   const dim = 20;
+  const debug = false;
+
   let clicking = false;
   let grid = create2d(20);
   let search: SearchFunction = new DFS(grid, 11, 0, dim, "d");
@@ -48,7 +50,12 @@
   };
 </script>
 
-<section class="grid grid-columns-20 w-full max-w-5xl">
+<section
+  class="grid grid-columns-20 w-full max-w-5xl"
+  on:mouseleave={() => {
+    clicking = false;
+  }}
+>
   {#each [...Array(dim * dim).keys()] as e}
     <div
       class="border border-slate-500 w-full h-10 m-0"
@@ -68,42 +75,31 @@
         addWall(e);
       }}
     >
-      <!-- {grid[index1d(e, dim)[0]][index1d(e, dim)[1]]} -->
+      {#if debug}
+        {grid[index1d(e, dim)[0]][index1d(e, dim)[1]]}
+      {/if}
     </div>
   {/each}
 </section>
-
-<!-- <button
-  class="border border-red-700 p-2 m-2"
-  on:click={() => {
-    const coords = dfs(grid, 11, 0, "F");
-    markGrid(grid, coords, "asdf");
-    grid = grid;
-  }}>path</button
-> -->
-
-<!-- <button
-  class="border border-red-700 p-2 m-2"
-  on:click={() => {
-    const visited = search.step();
-    if (visited) grid = layerGrid(grid, visited, "v");
-  }}>step</button
-> -->
-<button
-  class="px-3 py-2 rounded-md bg-slate-50 m-2"
-  class:bg-red-500={stepper != null}
-  on:click={() => {
-    if (stepper) {
-      clearInterval(stepper);
-      stepper = null;
-    } else {
-      stepper = setInterval(step, speed);
-    }
-  }}>{!stepper ? "Run" : "Stop"}</button
->
-<button class="px-3 py-2 rounded-md bg-slate-50 m-2" on:click={reset}
-  >Reset</button
->
+<div class="flex">
+  <button
+    class="px-3 py-2 rounded-md bg-slate-50 m-2 hover:bg-sky-500"
+    class:bg-red-500={stepper != null}
+    class:hover:bg-red-400={stepper != null}
+    on:click={() => {
+      if (stepper) {
+        clearInterval(stepper);
+        stepper = null;
+      } else {
+        stepper = setInterval(step, speed);
+      }
+    }}>{!stepper ? "Run" : "Stop"}</button
+  >
+  <button
+    class="px-3 py-2 rounded-md bg-slate-50 m-2 hover:bg-sky-500"
+    on:click={reset}>Reset</button
+  >
+</div>
 <input
   type="range"
   class="transform rotate-180"
