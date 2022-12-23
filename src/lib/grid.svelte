@@ -8,7 +8,7 @@
   const dim = 20;
   const debug = false;
 
-  let clicking = false;
+  let drawingWalls = false;
   let grid = create2d<string>(20);
   let searchFunctions = [
     { id: 0, name: "Depth First Search", func: DFS },
@@ -35,9 +35,9 @@
   let settingEnd = false;
 
   const addWall = (idx1d: number) => {
-    if (clicking) {
+    if (drawingWalls) {
       const [i, j] = index1d(idx1d, dim);
-      grid[i][j] = "X";
+      if (grid[i][j] == "") grid[i][j] = "X";
     }
   };
 
@@ -80,7 +80,7 @@
 <section
   class="grid grid-columns-20 w-full max-w-5xl"
   on:mouseleave={() => {
-    clicking = false;
+    drawingWalls = false;
 
     // put the start point back if it leaves the grid
     settingStart = false;
@@ -95,6 +95,8 @@
       class:bg-purple-400={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "p"}
       class:bg-red-600={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "s"}
       class:bg-green-600={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "d"}
+      class:hover:cursor-move={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] ==
+        "d" || grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "s"}
       class:hover:bg-red-600={settingStart}
       class:hover:bg-green-600={settingEnd}
       on:mousedown={() => {
@@ -124,12 +126,27 @@
             start_y = j;
           }
         } else {
-          clicking = true;
+          drawingWalls = true;
           addWall(e);
         }
       }}
       on:mouseup={() => {
-        clicking = false;
+        const [i, j] = index1d(e, dim);
+        if (settingStart) {
+          settingStart = false;
+          if (grid[i][j] == "") {
+            start_x = i;
+            start_y = j;
+          }
+        } else if (settingEnd) {
+          settingEnd = false;
+          if (grid[i][j] == "") {
+            dest_x = i;
+            dest_y = j;
+          }
+        }
+
+        drawingWalls = false;
       }}
       on:mouseenter={() => {
         addWall(e);
