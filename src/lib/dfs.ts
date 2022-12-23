@@ -1,7 +1,8 @@
-import { create2d, getAdjacent } from "./grid";
-import type { SearchFunction } from "./search";
 import { Stack } from "js-sdsl";
 import _ from "underscore";
+
+import { create2d, getAdjacent } from "./grid";
+import type { SearchFunction } from "./search";
 
 export class DFS implements SearchFunction {
   private stack: Stack<{

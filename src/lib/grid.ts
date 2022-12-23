@@ -1,4 +1,4 @@
-export function create2d<Type>(n: number, initial: any = ""): Type[][]  {
+export function create2d<Type>(n: number, initial: any = ""): Type[][] {
   return [...Array<Type>(n)].map((_) => Array<Type>(n).fill(initial));
 }
 
