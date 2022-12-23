@@ -64,3 +64,13 @@ export function layerGrid(grid: any[][], overlay: boolean[][], value: string) {
   }
   return grid;
 }
+
+export function extractLayer(grid: any[][], extract: string): boolean[][] {
+  const layer = create2d<boolean>(grid.length, false);
+  for (let i = 0; i < layer.length; ++i) {
+    for (let j = 0; j < layer.length; ++j) {
+      layer[i][j] = grid[i][j] == extract;
+    }
+  }
+  return layer;
+}

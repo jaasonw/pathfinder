@@ -1,7 +1,7 @@
 <script lang="ts">
   import { BFS } from "./bfs";
   import { DFS } from "./dfs";
-  import { create2d, getAdjacent, index1d, layerGrid, markGrid } from "./grid";
+  import { create2d, extractLayer, index1d, layerGrid, markGrid } from "./grid";
   import type { SearchFunction } from "./search";
   import Vtec from "./vtec.svelte";
 
@@ -9,17 +9,19 @@
   const debug = false;
 
   let drawingWalls = false;
+  let savedWalls: boolean[][] | null = null;
+
   let grid = create2d<string>(20);
   let searchFunctions = [
     { id: 0, name: "Depth First Search", func: DFS },
     { id: 1, name: "Breadth First Search", func: BFS },
   ];
-  let selected = 0;
   let start_x = 5;
   let start_y = 7;
   let dest_x = 17;
   let dest_y = 17;
-  // let dest = "d";
+
+  let selected = 0;
   let search: SearchFunction = new searchFunctions[selected].func(
     grid,
     dim,
@@ -43,6 +45,8 @@
 
   const reset = () => {
     grid = create2d<string>(20);
+    if (savedWalls) layerGrid(grid, savedWalls, "X");
+    savedWalls = null;
     grid[start_x][start_y] = "s";
     grid[dest_x][dest_y] = "d";
 
@@ -96,9 +100,14 @@
       class:bg-red-600={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "s"}
       class:bg-green-600={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "d"}
       class:hover:cursor-move={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] ==
-        "d" || grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "s"}
+        "d" ||
+        grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "s" ||
+        settingStart ||
+        settingEnd}
       class:hover:bg-red-600={settingStart}
       class:hover:bg-green-600={settingEnd}
+      class:hover:opacity-80={settingStart || settingEnd}
+      class:hover:scale-110={settingStart || settingEnd}
       on:mousedown={() => {
         const [i, j] = index1d(e, dim);
 
@@ -147,6 +156,7 @@
         }
 
         drawingWalls = false;
+        savedWalls = extractLayer(grid, "X");
       }}
       on:mouseenter={() => {
         addWall(e);
@@ -162,7 +172,10 @@
   <select
     bind:value={selected}
     on:change={(e) => {
+      // changing options should never reset the walls
+      savedWalls = extractLayer(grid, "X");
       reset();
+      savedWalls = extractLayer(grid, "X");
     }}
   >
     {#each searchFunctions as func}
@@ -187,7 +200,7 @@
     >
     <button
       class="px-3 py-2 rounded-md bg-slate-50 m-2 hover:bg-sky-500"
-      on:click={reset}>Reset</button
+      on:click={reset}>{savedWalls ? "Reset" : "Clear"}</button
     >
   </div>
   <div class="flex justify-center">
