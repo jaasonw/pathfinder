@@ -3,6 +3,7 @@
   import { DFS } from "./dfs";
   import { create2d, getAdjacent, index1d, layerGrid, markGrid } from "./grid";
   import type { SearchFunction } from "./search";
+  import Vtec from "./vtec.svelte";
 
   const dim = 20;
   const debug = false;
@@ -88,7 +89,7 @@
 >
   {#each [...Array(dim * dim).keys()] as e}
     <div
-      class="border border-slate-500 w-full h-10 m-0"
+      class="border border-slate-500 w-full h-8 m-0"
       class:bg-sky-600={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "v"}
       class:bg-black={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "X"}
       class:bg-purple-400={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "p"}
@@ -172,19 +173,23 @@
       on:click={reset}>Reset</button
     >
   </div>
-  <input
-    type="range"
-    class="transform rotate-180"
-    min="1"
-    max="500"
-    bind:value={speed}
-    on:change={() => {
-      if (stepper) {
-        clearInterval(stepper);
-        stepper = setInterval(step, speed);
-      }
-    }}
-  />
+  <div class="flex justify-center">
+    <div class="text-4xl">🐢</div>
+    <input
+      type="range"
+      class="transform rotate-180"
+      min="1"
+      max="100"
+      bind:value={speed}
+      on:change={() => {
+        if (stepper) {
+          clearInterval(stepper);
+          stepper = setInterval(step, speed);
+        }
+      }}
+    />
+    <Vtec class="stroke-white fill-white" />
+  </div>
 </div>
 
 <style>
