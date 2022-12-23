@@ -14,15 +14,18 @@
     { id: 1, name: "Breadth First Search", func: BFS },
   ];
   let selected = 0;
-  let start_x = 11;
-  let start_y = 0;
-  let dest = "d";
+  let start_x = 5;
+  let start_y = 7;
+  let dest_x = 17;
+  let dest_y = 17;
+  // let dest = "d";
   let search: SearchFunction = new searchFunctions[selected].func(
     grid,
+    dim,
     start_x,
     start_y,
-    dim,
-    dest
+    dest_x,
+    dest_y
   );
   let stepper: NodeJS.Timer | null = null;
   let speed = 10;
@@ -30,29 +33,25 @@
   let settingStart = false;
   let settingEnd = false;
 
-  grid[11][0] = "s";
-  grid[11][19] = "d";
-
   const addWall = (idx1d: number) => {
     if (clicking) {
       const [i, j] = index1d(idx1d, dim);
-      console.log(i, j);
-      console.log(getAdjacent(grid, i, j));
       grid[i][j] = "X";
     }
   };
 
   const reset = () => {
     grid = create2d<string>(20);
-    grid[11][0] = "s";
-    grid[11][19] = "d";
+    grid[start_x][start_y] = "s";
+    grid[dest_x][dest_y] = "d";
 
     search = new searchFunctions[selected].func(
       grid,
+      dim,
       start_x,
       start_y,
-      dim,
-      dest
+      dest_x,
+      dest_y
     );
     if (stepper) {
       clearInterval(stepper);
@@ -70,12 +69,21 @@
       }
     }
   };
+
+  $: search.setStart(start_x, start_y);
+  $: search.setDest(dest_x, dest_y);
+  $: if (!settingStart) grid[start_x][start_y] = "s";
+  $: if (!settingEnd) grid[dest_x][dest_y] = "d";
 </script>
 
 <section
   class="grid grid-columns-20 w-full max-w-5xl"
   on:mouseleave={() => {
     clicking = false;
+
+    // put the start point back if it leaves the grid
+    settingStart = false;
+    settingEnd = false;
   }}
 >
   {#each [...Array(dim * dim).keys()] as e}
@@ -86,9 +94,38 @@
       class:bg-purple-400={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "p"}
       class:bg-red-600={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "s"}
       class:bg-green-600={grid[index1d(e, dim)[0]][index1d(e, dim)[1]] == "d"}
+      class:hover:bg-red-600={settingStart}
+      class:hover:bg-green-600={settingEnd}
       on:mousedown={() => {
-        clicking = true;
-        addWall(e);
+        const [i, j] = index1d(e, dim);
+
+        // handle a click on the start square
+        if (grid[i][j] == "s") {
+          grid[i][j] = "";
+          settingStart = true;
+        } else if (grid[i][j] == "d") {
+          grid[i][j] = "";
+          settingEnd = true;
+        }
+        // handle a click on the destination square when moving it
+        else if (settingEnd) {
+          if (grid[i][j] == "") {
+            settingEnd = false;
+            dest_x = i;
+            dest_y = j;
+          }
+        }
+        // handle a click on the start square when moving it
+        else if (settingStart) {
+          if (grid[i][j] == "") {
+            settingStart = false;
+            start_x = i;
+            start_y = j;
+          }
+        } else {
+          clicking = true;
+          addWall(e);
+        }
       }}
       on:mouseup={() => {
         clicking = false;
@@ -107,7 +144,6 @@
   <select
     bind:value={selected}
     on:change={(e) => {
-      // console.log(e);
       reset();
     }}
   >

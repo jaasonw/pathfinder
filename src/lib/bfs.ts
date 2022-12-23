@@ -1,6 +1,7 @@
 import { create2d, getAdjacent } from "./grid";
 import type { SearchFunction } from "./search";
 import { Queue } from "js-sdsl";
+import _ from "underscore";
 
 interface Path {
   i: number;
@@ -13,20 +14,23 @@ export class BFS implements SearchFunction {
   private grid: string[][];
   private visited: boolean[][];
   private done: boolean;
-  private dest: string;
+  private dest_x: number;
+  private dest_y: number;
   private _path: any[] | null;
   constructor(
     grid: string[][],
+    dim: number,
     start_x: number,
     start_y: number,
-    dim: number,
-    dest: string
+    dest_x: number,
+    dest_y: number
   ) {
     this.queue = new Queue();
     this.visited = create2d(dim, false);
     this.done = false;
     this.grid = grid;
-    this.dest = dest;
+    this.dest_x = dest_x;
+    this.dest_y = dest_y;
     this._path = null;
 
     this.queue.push({ i: start_x, j: start_y, path: [] });
@@ -37,7 +41,7 @@ export class BFS implements SearchFunction {
       e = this.queue.pop();
     } while (e && this.visited[e.i][e.j]);
     if (!e || this.done) return null;
-    if (this.grid[e.i][e.j] == this.dest) {
+    if (_([e.i, e.j]).isEqual([this.dest_x, this.dest_y])) {
       this._path = e.path;
       this.done = true;
     }
@@ -58,5 +62,15 @@ export class BFS implements SearchFunction {
 
   public get path() {
     return this._path;
+  }
+
+  public setStart(x: number, y: number) {
+    this.queue = new Queue();
+    this.queue.push({ i: x, j: y, path: [] });
+  }
+
+  public setDest(x: number, y: number) {
+    this.dest_x = x;
+    this.dest_y = y;
   }
 }
