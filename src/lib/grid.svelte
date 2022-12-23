@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { BFS } from "./bfs";
   import { DFS } from "./dfs";
   import { create2d, getAdjacent, index1d, layerGrid, markGrid } from "./grid";
   import type { SearchFunction } from "./search";
@@ -7,8 +8,22 @@
   const debug = false;
 
   let clicking = false;
-  let grid = create2d(20);
-  let search: SearchFunction = new DFS(grid, 11, 0, dim, "d");
+  let grid = create2d<string>(20);
+  let searchFunctions = [
+    { id: 0, name: "Depth First Search", func: DFS },
+    { id: 1, name: "Breadth First Search", func: BFS },
+  ];
+  let selected = 0;
+  let start_x = 11;
+  let start_y = 0;
+  let dest = "d";
+  let search: SearchFunction = new searchFunctions[selected].func(
+    grid,
+    start_x,
+    start_y,
+    dim,
+    dest
+  );
   let stepper: NodeJS.Timer | null = null;
   let speed = 10;
 
@@ -28,10 +43,17 @@
   };
 
   const reset = () => {
-    grid = create2d(20);
-    search = new DFS(grid, 11, 0, dim, "d");
+    grid = create2d<string>(20);
     grid[11][0] = "s";
     grid[11][19] = "d";
+
+    search = new searchFunctions[selected].func(
+      grid,
+      start_x,
+      start_y,
+      dim,
+      dest
+    );
     if (stepper) {
       clearInterval(stepper);
       stepper = null;
@@ -81,38 +103,53 @@
     </div>
   {/each}
 </section>
-<div class="flex">
-  <button
-    class="px-3 py-2 rounded-md bg-slate-50 m-2 hover:bg-sky-500"
-    class:bg-red-500={stepper != null}
-    class:hover:bg-red-400={stepper != null}
-    on:click={() => {
+<div class="flex flex-col my-5 gap-2">
+  <select
+    bind:value={selected}
+    on:change={(e) => {
+      // console.log(e);
+      reset();
+    }}
+  >
+    {#each searchFunctions as func}
+      <option value={func.id}>
+        {func.name}
+      </option>
+    {/each}
+  </select>
+  <div class="flex justify-center">
+    <button
+      class="px-3 py-2 rounded-md bg-slate-50 m-2 hover:bg-sky-500"
+      class:bg-red-500={stepper != null}
+      class:hover:bg-red-400={stepper != null}
+      on:click={() => {
+        if (stepper) {
+          clearInterval(stepper);
+          stepper = null;
+        } else {
+          stepper = setInterval(step, speed);
+        }
+      }}>{!stepper ? "Run" : "Stop"}</button
+    >
+    <button
+      class="px-3 py-2 rounded-md bg-slate-50 m-2 hover:bg-sky-500"
+      on:click={reset}>Reset</button
+    >
+  </div>
+  <input
+    type="range"
+    class="transform rotate-180"
+    min="1"
+    max="500"
+    bind:value={speed}
+    on:change={() => {
       if (stepper) {
         clearInterval(stepper);
-        stepper = null;
-      } else {
         stepper = setInterval(step, speed);
       }
-    }}>{!stepper ? "Run" : "Stop"}</button
-  >
-  <button
-    class="px-3 py-2 rounded-md bg-slate-50 m-2 hover:bg-sky-500"
-    on:click={reset}>Reset</button
-  >
+    }}
+  />
 </div>
-<input
-  type="range"
-  class="transform rotate-180"
-  min="1"
-  max="500"
-  bind:value={speed}
-  on:change={() => {
-    if (stepper) {
-      clearInterval(stepper);
-      stepper = setInterval(step, speed);
-    }
-  }}
-/>
 
 <style>
   * {

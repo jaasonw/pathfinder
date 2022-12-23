@@ -1,9 +1,5 @@
-// export abstract class SearchFunction {
-//   constructor(grid: string[][], x: number, y: number, dim: number) {}
-//   step(): {}
-// }
-
 export interface SearchFunction {
+  // new (params: SearchParams): void;
   step(): boolean[][] | null;
   readonly path: any[] | null;
 }

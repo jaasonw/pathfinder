@@ -1,5 +1,5 @@
-export function create2d(n: number, initial: any = "") {
-  return [...Array(n)].map((_) => Array(n).fill(initial));
+export function create2d<Type>(n: number, initial: any = ""): Type[][]  {
+  return [...Array<Type>(n)].map((_) => Array<Type>(n).fill(initial));
 }
 
 /**
