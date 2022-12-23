@@ -38,6 +38,16 @@
     }
   };
 
+  const run = () => {
+    savedWalls = extractLayer(grid, "X");
+    if (stepper) {
+      clearInterval(stepper);
+      stepper = null;
+    } else {
+      stepper = setInterval(step, speed);
+    }
+  };
+
   const reset = () => {
     grid = create2d<string>(20);
     if (savedWalls) layerGrid(grid, savedWalls, "X");
@@ -85,14 +95,13 @@
       class:bg-red-500={stepper != null}
       class:hover:bg-red-400={stepper != null}
       on:click={() => {
-        savedWalls = extractLayer(grid, "X");
-        if (stepper) {
-          clearInterval(stepper);
-          stepper = null;
-        } else {
-          stepper = setInterval(step, speed);
+        if (search.path) {
+          savedWalls = extractLayer(grid, "X");
+          reset();
+          savedWalls = extractLayer(grid, "X");
         }
-      }}>{!stepper ? "Run" : "Stop"}</button
+        run();
+      }}>{stepper ? "Stop" : search.path ? "Rerun" : "Run"}</button
     >
     <button
       class="px-3 py-2 rounded-md bg-slate-50 m-2 hover:bg-sky-500"
