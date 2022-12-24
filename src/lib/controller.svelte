@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { AStar } from "./astar";
   import { BFS } from "./bfs";
   import { DFS } from "./dfs";
   import { create2d, extractLayer, layerGrid, markGrid } from "./grid";
@@ -13,6 +14,7 @@
   let searchFunctions = [
     { id: 0, name: "Depth First Search", func: DFS },
     { id: 1, name: "Breadth First Search", func: BFS },
+    { id: 2, name: "A* Search", func: AStar },
   ];
 
   let selected = 0;

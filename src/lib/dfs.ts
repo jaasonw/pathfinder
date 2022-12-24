@@ -2,14 +2,10 @@ import { Stack } from "js-sdsl";
 import _ from "underscore";
 
 import { create2d, getAdjacent } from "./grid";
-import type { SearchFunction } from "./search";
+import type { Path, SearchFunction } from "./search";
 
 export class DFS implements SearchFunction {
-  private stack: Stack<{
-    i: number;
-    j: number;
-    path: any[];
-  }>;
+  private stack: Stack<Path>;
   private grid: string[][];
   private visited: boolean[][];
   private done: boolean;
